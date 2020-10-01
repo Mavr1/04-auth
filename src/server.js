@@ -8,6 +8,7 @@ const morgan = require('morgan');
 
 const { contactsRouter } = require('./contacts/contacts.router');
 const { authRouter } = require('./auth/auth.router');
+const { userRouter } = require('./users/user.router');
 
 module.exports.CRUDServer = {
   app: null,
@@ -40,6 +41,7 @@ module.exports.CRUDServer = {
   initRoutes() {
     this.app.use('/auth', authRouter);
     this.app.use('/contacts', contactsRouter);
+    this.app.use('/users', userRouter);
   },
 
   initErrorHandling() {
