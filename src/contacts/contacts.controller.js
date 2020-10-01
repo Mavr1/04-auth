@@ -1,9 +1,11 @@
 const { ContactModel } = require('./contacts.model');
-const mongoose = require('mongoose');
 
 exports.getContacts = async (req, res, next) => {
   try {
-    const contacts = await ContactModel.find();
+    const contacts = await ContactModel.paginate(
+      {},
+      { page: req.query.page, limit: req.query.limit }
+    );
 
     res.status(200).json(contacts);
   } catch (error) {
