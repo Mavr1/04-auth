@@ -3,7 +3,7 @@ const { ContactModel } = require('./contacts.model');
 exports.getContacts = async (req, res, next) => {
   try {
     const contacts = await ContactModel.paginate(
-      {},
+      req.query.sub && { subscription: req.query.sub },
       { page: req.query.page, limit: req.query.limit }
     );
 
