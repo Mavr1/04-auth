@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const Joi = require('joi');
+const { authorize } = require('../auth/auth.controller');
 const { validate } = require('../helpers/validate');
 const { updateSubscription } = require('./user.controller');
 
@@ -9,6 +10,6 @@ const userSchema = Joi.object({
   subscription: Joi.string().valid('free', 'pro', 'premium').required(),
 });
 
-router.patch('/:userId', validate(userSchema), updateSubscription);
+router.patch('/:userId', authorize, validate(userSchema), updateSubscription);
 
 exports.userRouter = router;

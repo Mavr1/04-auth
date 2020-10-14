@@ -1,84 +1,92 @@
 const { ContactModel } = require('./contacts.model');
+const promiseHandler = require('../helpers/helpers');
 
 exports.getContacts = async (req, res, next) => {
-  try {
-    const contacts = await ContactModel.paginate(
-      req.query.sub && { subscription: req.query.sub },
-      { page: req.query.page, limit: req.query.limit }
-    );
+  const [error, contacts] = await promiseHandler(
+    ContactModel.paginate(req.query.sub && { subscription: req.query.sub }, {
+      page: req.query.page || 1,
+      limit: req.query.limit || 5,
+    })
+  );
 
-    res.status(200).json(contacts);
-  } catch (error) {
+  if (error) {
     next(error);
   }
+
+  return res.status(200).json(contacts);
 };
 
 exports.getContact = async (req, res, next) => {
   const { contactId } = req.params;
 
-  try {
-    const contact = await ContactModel.findById(contactId);
-    if (!contact) {
-      res.status(404).json({ message: 'Contact not found' });
-      return;
-    }
+  const [error, contact] = await promiseHandler(
+    ContactModel.findById(contactId)
+  );
 
-    res.status(200).json(contact);
-  } catch (error) {
+  if (!contact) {
+    res.status(404).json({ message: 'Contact not found' });
+    return;
+  }
+  if (error) {
     next(error);
   }
+
+  return res.status(200).json(contact);
 };
 
 exports.addContact = async (req, res, next) => {
-  try {
-    const existingUser = await ContactModel.findOne({ email: req.body.email });
+  const [errorUser, existingUser] = await promiseHandler(
+    ContactModel.findOne({
+      email: req.body.email,
+    })
+  );
 
-    if (existingUser) {
-      return res.status(409).send('User with such email already exists');
-    }
+  if (existingUser) {
+    return res.status(409).send('User with such email already exists');
+  }
 
-    const newContact = await ContactModel.create(req.body);
-    res.status(201).json(newContact);
-  } catch (error) {
-    next(error);
+  const [errorNewContact, newContact] = await ContactModel.create(req.body);
+  res.status(201).json(newContact);
+
+  if (errorUser || errorNewContact) {
+    next(errorUser || errorNewContact);
   }
 };
 
 exports.removeContact = async (req, res, next) => {
-  try {
-    const { contactId } = req.params;
+  const { contactId } = req.params;
 
-    const contact = await ContactModel.findByIdAndDelete(contactId);
-    if (!contact) {
-      res.status(404).json({ message: 'Contact not found' });
-      return;
-    }
+  const [error, contact] = await promiseHandler(
+    ContactModel.findByIdAndDelete(contactId)
+  );
 
-    res.status(200).json({ message: 'Contact deleted' });
-  } catch (error) {
+  if (!contact) {
+    res.status(404).json({ message: 'Contact not found' });
+    return;
+  }
+  if (error) {
     next(error);
   }
+
+  return res.status(200).json({ message: 'Contact deleted' });
 };
 
 exports.updateContact = async (req, res, next) => {
   const { contactId } = req.params;
 
-  try {
-    const updatedContact = await ContactModel.findByIdAndUpdate(
-      contactId,
-      req.body,
-      {
-        new: true,
-      }
-    );
+  const [error, updatedContact] = await promiseHandler(
+    ContactModel.findByIdAndUpdate(contactId, req.body, {
+      new: true,
+    })
+  );
 
-    if (!updatedContact) {
-      res.status(404).json({ message: 'Contact not found' });
-      return;
-    }
-
-    res.status(200).json(updatedContact);
-  } catch (error) {
+  if (!updatedContact) {
+    res.status(404).json({ message: 'Contact not found' });
+    return;
+  }
+  if (error) {
     next(error);
   }
+
+  return res.status(200).json(updatedContact);
 };

@@ -1,88 +1,88 @@
 const jwt = require('jsonwebtoken');
 const bcryptjs = require('bcryptjs');
 const { UserModel } = require('../users/user.model');
+const promiseHandler = require('../helpers/helpers');
 
 exports.register = async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    const existingUser = await UserModel.findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({ message: 'Email in use' });
-    }
+  const [errUser, existingUser] = await promiseHandler(
+    UserModel.findOne({ email })
+  );
 
-    const passwordHash = await bcryptjs.hash(
-      password,
-      Number(process.env.BCRYPT_SALT_ROUNDS)
-    );
+  if (existingUser) {
+    return res.status(409).json({ message: 'Email in use' });
+  }
 
-    const newUser = await UserModel.create({
+  const passwordHash = await bcryptjs.hash(
+    password,
+    Number(process.env.BCRYPT_SALT_ROUNDS)
+  );
+
+  const [errNewUser, newUser] = await promiseHandler(
+    UserModel.create({
       email,
       password: passwordHash,
-    });
+    })
+  );
 
-    res.status(201).json({
-      user: {
-        id: newUser._id,
-        email: newUser.email,
-        subscription: newUser.subscription,
-      },
-    });
-  } catch (err) {
-    next(err);
-  }
+  res.status(201).json({
+    user: {
+      id: newUser._id,
+      email: newUser.email,
+      subscription: newUser.subscription,
+    },
+  });
+
+  next(errUser || errNewUser);
 };
 
 exports.logIn = async (req, res, next) => {
   const { email, password } = req.body;
 
-  try {
-    const user = await UserModel.findOne({ email });
-    if (!user) {
-      return res.status(403).json('Email or password is wrong');
-    }
+  const [errUser, user] = await promiseHandler(UserModel.findOne({ email }));
 
-    const isPasswordCorrect = await bcryptjs.compare(password, user.password);
-    if (!isPasswordCorrect) {
-      return res.status(403).json('Email or password is wrong');
-    }
+  if (!user) {
+    return res.status(401).json({ message: 'Email or password is wrong' });
+  }
 
-    const token = jwt.sign({ uid: user._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    });
+  const isPasswordCorrect = await bcryptjs.compare(password, user.password);
+  if (!isPasswordCorrect) {
+    return res.status(401).json({ message: 'Email or password is wrong' });
+  }
 
-    const loggedInUser = await UserModel.findByIdAndUpdate(
+  const token = jwt.sign({ uid: user._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+
+  const [errLoggedIn, loggedInUser] = await promiseHandler(
+    UserModel.findByIdAndUpdate(
       user._id,
       { token },
       {
         new: true,
       }
-    );
+    )
+  );
 
-    res.status(200).json({
-      token,
-      user: {
-        email: loggedInUser.email,
-        subscription: loggedInUser.subscription,
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
+  res.status(200).json({
+    token,
+    user: {
+      email: loggedInUser.email,
+      subscription: loggedInUser.subscription,
+    },
+  });
+
+  next(errUser || errLoggedIn);
 };
 
 exports.authorize = async (req, res, next) => {
-  let payload;
+  const token = req.header('Authorization');
+  const payload = jwt.verify(token, process.env.JWT_SECRET);
 
-  try {
-    const token = req.header('Authorization');
-    payload = jwt.verify(token, process.env.JWT_SECRET);
-  } catch (error) {
-    return res.status(401).json({ message: 'Not authorized', error });
-  }
+  const [errUser, user] = await promiseHandler(UserModel.findById(payload.uid));
 
-  const user = await UserModel.findById(payload.uid);
-  if (!user) {
+  if (errUser || !user) {
     return res.status(401).json({ message: 'Not authorized' });
   }
 
@@ -91,17 +91,19 @@ exports.authorize = async (req, res, next) => {
 };
 
 exports.logOut = async (req, res, next) => {
-  try {
-    const loggedOutUser = await UserModel.findByIdAndUpdate(
+  const [err] = await promiseHandler(
+    UserModel.findByIdAndUpdate(
       req.user._id,
       { token: '' },
       {
         new: true,
       }
-    );
+    )
+  );
 
-    res.status(204);
-  } catch (error) {
-    return res.status(401).json({ message: error });
+  if (err) {
+    return res.status(401).json({ message: err });
   }
+
+  return res.status(204).json();
 };
