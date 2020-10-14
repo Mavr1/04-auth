@@ -1,16 +1,17 @@
 const jwt = require('jsonwebtoken');
 const bcryptjs = require('bcryptjs');
 const { UserModel } = require('../users/user.model');
-const promiseHandler = require('../helpers/helpers');
+const { promiseHandler, deleteFile } = require('../helpers/helpers');
 
 exports.register = async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, avatar } = req.body;
 
   const [errUser, existingUser] = await promiseHandler(
     UserModel.findOne({ email })
   );
 
   if (existingUser) {
+    await deleteFile(req.body.avatar);
     return res.status(409).json({ message: 'Email in use' });
   }
 
@@ -23,6 +24,7 @@ exports.register = async (req, res, next) => {
     UserModel.create({
       email,
       password: passwordHash,
+      avatarUrl: 'http://localhost:3000/images/' + avatar,
     })
   );
 

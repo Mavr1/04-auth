@@ -1,7 +1,7 @@
 const { UserModel } = require('./user.model');
-const promiseHandler = require('../helpers/helpers');
+const { promiseHandler, getDataForResponse } = require('../helpers/helpers');
 
-exports.updateSubscription = async (req, res, next) => {
+exports.updateUser = async (req, res, next) => {
   const { userId } = req.params;
 
   const [error, updatedUser] = await promiseHandler(
@@ -15,7 +15,7 @@ exports.updateSubscription = async (req, res, next) => {
     return;
   }
 
-  res.status(200).json(updatedUser);
+  res.status(200).json(getDataForResponse(updatedUser));
 
   if (error) {
     next(error);

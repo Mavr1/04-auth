@@ -1,5 +1,5 @@
 const { ContactModel } = require('./contacts.model');
-const promiseHandler = require('../helpers/helpers');
+const { promiseHandler } = require('../helpers/helpers');
 
 exports.getContacts = async (req, res, next) => {
   const [error, contacts] = await promiseHandler(

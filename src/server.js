@@ -36,6 +36,7 @@ module.exports.CRUDServer = {
     this.app.use(express.json());
     this.app.use(cors({ origin: process.env.ALLOWED_ORIGIN }));
     this.app.use(morgan('tiny'));
+    this.app.use(express.static('public'));
   },
 
   initRoutes() {
