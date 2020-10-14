@@ -34,7 +34,9 @@ exports.register = async (req, res, next) => {
     },
   });
 
-  next(errUser || errNewUser);
+  if (errUser || errNewUser) {
+    next(errUser || errNewUser);
+  }
 };
 
 exports.logIn = async (req, res, next) => {
@@ -73,7 +75,9 @@ exports.logIn = async (req, res, next) => {
     },
   });
 
-  next(errUser || errLoggedIn);
+  if (errUser || errLoggedIn) {
+    next(errUser || errLoggedIn);
+  }
 };
 
 exports.authorize = async (req, res, next) => {

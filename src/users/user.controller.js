@@ -4,7 +4,7 @@ const promiseHandler = require('../helpers/helpers');
 exports.updateSubscription = async (req, res, next) => {
   const { userId } = req.params;
 
-  const [err, updatedUser] = await promiseHandler(
+  const [error, updatedUser] = await promiseHandler(
     UserModel.findByIdAndUpdate(userId, req.body, {
       new: true,
     })
@@ -15,9 +15,9 @@ exports.updateSubscription = async (req, res, next) => {
     return;
   }
 
-  if (err) {
-    next(err);
-  }
+  res.status(200).json(updatedUser);
 
-  return res.status(200).json(updatedUser);
+  if (error) {
+    next(error);
+  }
 };

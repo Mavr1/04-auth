@@ -9,11 +9,11 @@ exports.getContacts = async (req, res, next) => {
     })
   );
 
+  res.status(200).json(contacts);
+
   if (error) {
     next(error);
   }
-
-  return res.status(200).json(contacts);
 };
 
 exports.getContact = async (req, res, next) => {
@@ -27,11 +27,12 @@ exports.getContact = async (req, res, next) => {
     res.status(404).json({ message: 'Contact not found' });
     return;
   }
+
+  res.status(200).json(contact);
+
   if (error) {
     next(error);
   }
-
-  return res.status(200).json(contact);
 };
 
 exports.addContact = async (req, res, next) => {
@@ -64,11 +65,12 @@ exports.removeContact = async (req, res, next) => {
     res.status(404).json({ message: 'Contact not found' });
     return;
   }
+
+  res.status(200).json({ message: 'Contact deleted' });
+
   if (error) {
     next(error);
   }
-
-  return res.status(200).json({ message: 'Contact deleted' });
 };
 
 exports.updateContact = async (req, res, next) => {
@@ -84,9 +86,10 @@ exports.updateContact = async (req, res, next) => {
     res.status(404).json({ message: 'Contact not found' });
     return;
   }
+
+  res.status(200).json(updatedContact);
+
   if (error) {
     next(error);
   }
-
-  return res.status(200).json(updatedContact);
 };
