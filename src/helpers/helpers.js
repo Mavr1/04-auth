@@ -23,13 +23,6 @@ module.exports.addAvatar = (req, res, next) => {
   next();
 };
 
-module.exports.getDataForResponse = (userData) => ({
-  subscription: userData.subscription,
-  _id: userData._id,
-  email: userData.email,
-  avatarUrl: userData.avatarUrl,
-});
-
 module.exports.deleteFile = async (fileName) => {
   try {
     await fs.promises.unlink(`public/images/${fileName}`);

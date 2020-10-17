@@ -1,8 +1,11 @@
 const { UserModel } = require('./user.model');
-const { promiseHandler, getDataForResponse } = require('../helpers/helpers');
+const { promiseHandler } = require('../helpers/helpers');
+const jwt = require('jsonwebtoken');
 
 exports.updateUser = async (req, res, next) => {
-  const { userId } = req.params;
+  const token = req.header('Authorization');
+  const payload = jwt.verify(token, process.env.JWT_SECRET);
+  const userId = payload.uid;
 
   const [error, updatedUser] = await promiseHandler(
     UserModel.findByIdAndUpdate(userId, req.body, {
@@ -15,9 +18,16 @@ exports.updateUser = async (req, res, next) => {
     return;
   }
 
-  res.status(200).json(getDataForResponse(updatedUser));
+  getDataForResponse = (userData) => ({
+    subscription: userData.subscription,
+    _id: userData._id,
+    email: userData.email,
+    avatarUrl: userData.avatarUrl,
+  });
 
   if (error) {
     next(error);
   }
+
+  res.status(200).json(getDataForResponse(updatedUser));
 };

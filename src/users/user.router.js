@@ -13,12 +13,14 @@ const userSchema = Joi.object({
 });
 
 router.patch(
-  '/:userId',
+  '/avatars',
   authorize,
   upload.single('avatar'),
   addAvatar,
   validate(userSchema),
   updateUser
 );
+
+router.patch('/:userId', authorize, validate(userSchema), updateUser);
 
 exports.userRouter = router;
