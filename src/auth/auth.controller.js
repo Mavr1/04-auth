@@ -28,10 +28,6 @@ exports.register = async (req, res, next) => {
     })
   );
 
-  if (errUser || errNewUser) {
-    next(errUser || errNewUser);
-  }
-
   res.status(201).json({
     user: {
       id: newUser._id,
@@ -39,6 +35,10 @@ exports.register = async (req, res, next) => {
       subscription: newUser.subscription,
     },
   });
+
+  if (errUser || errNewUser) {
+    next(errUser || errNewUser);
+  }
 };
 
 exports.logIn = async (req, res, next) => {
@@ -69,6 +69,10 @@ exports.logIn = async (req, res, next) => {
     )
   );
 
+  if (errUser || errLoggedIn) {
+    next(errUser || errLoggedIn);
+  }
+
   res.status(200).json({
     token,
     user: {
@@ -76,10 +80,6 @@ exports.logIn = async (req, res, next) => {
       subscription: loggedInUser.subscription,
     },
   });
-
-  if (errUser || errLoggedIn) {
-    next(errUser || errLoggedIn);
-  }
 };
 
 exports.authorize = async (req, res, next) => {

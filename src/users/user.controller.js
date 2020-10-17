@@ -25,9 +25,9 @@ exports.updateUser = async (req, res, next) => {
     avatarUrl: userData.avatarUrl,
   });
 
+  res.status(200).json(getDataForResponse(updatedUser));
+
   if (error) {
     next(error);
   }
-
-  res.status(200).json(getDataForResponse(updatedUser));
 };

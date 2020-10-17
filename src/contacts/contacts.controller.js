@@ -9,11 +9,11 @@ exports.getContacts = async (req, res, next) => {
     })
   );
 
-  res.status(200).json(contacts);
-
   if (error) {
     next(error);
   }
+
+  res.status(200).json(contacts);
 };
 
 exports.getContact = async (req, res, next) => {
@@ -28,11 +28,11 @@ exports.getContact = async (req, res, next) => {
     return;
   }
 
-  res.status(200).json(contact);
-
   if (error) {
     next(error);
   }
+
+  res.status(200).json(contact);
 };
 
 exports.addContact = async (req, res, next) => {
@@ -47,11 +47,12 @@ exports.addContact = async (req, res, next) => {
   }
 
   const [errorNewContact, newContact] = await ContactModel.create(req.body);
-  res.status(201).json(newContact);
 
   if (errorUser || errorNewContact) {
     next(errorUser || errorNewContact);
   }
+
+  res.status(201).json(newContact);
 };
 
 exports.removeContact = async (req, res, next) => {
@@ -66,11 +67,11 @@ exports.removeContact = async (req, res, next) => {
     return;
   }
 
-  res.status(200).json({ message: 'Contact deleted' });
-
   if (error) {
     next(error);
   }
+
+  res.status(200).json({ message: 'Contact deleted' });
 };
 
 exports.updateContact = async (req, res, next) => {
@@ -87,9 +88,9 @@ exports.updateContact = async (req, res, next) => {
     return;
   }
 
-  res.status(200).json(updatedContact);
-
   if (error) {
     next(error);
   }
+
+  res.status(200).json(updatedContact);
 };
